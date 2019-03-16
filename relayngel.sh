@@ -25,4 +25,5 @@
 
 export FLASK_APP=relayngel.py
 export FLASH=ENV=development
+
 flask run --port=8888 

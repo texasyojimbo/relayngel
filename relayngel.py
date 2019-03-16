@@ -4,6 +4,7 @@ app = Flask(__name__)
 
 import sys
 import time
+import serial
 import ftd2xx as ft
 import xml.etree.ElementTree as ET
 
@@ -24,8 +25,7 @@ relay_index = -1
 for relay in root:
     relay_index     = relay.get("index")
     relay_type      = relay.get("type")
-    relay_serial    = relay.get("serial")
-    print (" ~ Relay Device Configured:\n ~ #"+relay_index+"\tType: "+relay_type+"\tSerial: "+relay_serial)
+    print (" ~ Relay Device Configured:\n ~ #"+relay_index+"\tType: "+relay_type)
     device_index = -1
     for device in relay:
         device_index        = device.get("index")
@@ -59,7 +59,9 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
     for relay in root:
         relay_index     = relay.get("index")
         relay_type      = relay.get("type")
-        relay_serial    = relay.get("serial")
+        relay_serial    = relay.get("serial_number")
+        relay_port      = relay.get("port")
+        relay_baud      = relay.get("baud")
 
         if relay_type == "FTDI_1982-USB4CH":
         
@@ -79,7 +81,7 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
                     ftdi_dev_list_index += 1
             
             if ftdi_dev_index == -1:
-                confErrorExit("FTDI_1982-USB4CH Device with Serial# "+relay_serial+"Not Found.")
+                confErrorExit ("FTDI_1982-USB4CH Device with Serial# "+str(relay_serial)+"Not Found.")
 
             ftdi_dev = ft.open(ftdi_dev_index)
 
@@ -96,9 +98,9 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
                 device_index = device.get("index")
                 if device_index == str(rcvd_dev_index):
                     if rcvd_dev_state == 0:
-                        device_action       = device.get("off")
+                        device_action = device.get("off")
                     if rcvd_dev_state == 1:
-                        device_action       = device.get("on")
+                        device_action = device.get("on")
                     device_action_tuple = device_action.split(",")
                     item_number=0
                     for item_state in device_action_tuple:
@@ -115,8 +117,28 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
             print (" ! Updated State for Relay "+relay_type+" with s/n "+relay_serial+": "+state_string)           
             ftdi_dev.close()                    
 
-#        if relay_type == "CH340_LCUS-1":
 
+        if relay_type == "CH341_LCUS-1":
+            
+            ser=serial.Serial()
+            ser.port=relay_port
+            ser.baud=relay_baud
+            ser.open()
+            
+            for device in relay:
+                device_index = device.get("index")
+                if device_index == str(rcvd_dev_index):
+                    if rcvd_dev_state == 1:
+                        device_action = device.get("on")
+                    elif rcvd_dev_state == 0:
+                        device_action = device.get("off")
+                    if device_action == "1":
+                        ser.write("A00101A2".decode('hex'))
+                        print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 1")
+                    elif device_action == "0":
+                        ser.write("A00100A1".decode('hex'))
+                        print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 0")
+            ser.close()
 
 
 
