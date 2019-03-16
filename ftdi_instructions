@@ -7,7 +7,9 @@
 		sudo cp /release/build/lib/libftd* /usr/local/lib && ln -sf /usr/local/lib/libftd2xx.so.1.4.8 /usr/local/lib/libftd2xx.so
 	* Run sudo ldconfig 
 
-(2) pip install ftd2xx
+(2) Install the ftd2xx module for Python: pip install ftd2xx
 
-(3) rmmod ftdi_sio (if you get DEVICE_NOT_OPENED errors).
-
+(3) Suppress the ftdi_sio kernel module  (if you get DEVICE_NOT_OPENED errors):
+	
+	* Once: sudo rmmod ftdi_sio
+	* Permanent: Add to /etc/modprobe.d/blacklist.conf or create a separate blacklist conf file

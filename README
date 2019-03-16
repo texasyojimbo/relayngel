@@ -1,0 +1,113 @@
+###############################################
+#
+# relayngel
+#
+###############################################
+#
+# author: AD5NL   (jim.dallas@gmail.com)
+# date: 16 March 2019
+#
+###############################################
+
+CREDITS
+This project is based on several other projects:
+
+1. The base for relayngel.py is reverseapi.py, written by Edouard F4EXB as part of his
+SDRAngel project: https://github.com/f4exb/sdrangel. Some of the Reverse API code is directly copied from there.
+
+2. I also was inspired by some code posted on Amazon user "M" who posted some basic Python code 
+for the Sainsmart 1982-USB4CH device. This was very necessary given that the SainSmart documentation
+is simply wrong, and the FTDI documentation does not really discuss Python much.
+Link: https://www.amazon.com/gp/customer-reviews/R1H80WYYIJ66JK/ref=cm_cr_dp_d_rvw_ttl?ie=UTF8&ASIN=B009A524Z0
+
+
+LICENSE
+This code is free-to-use by anyone for any-purpose, provided credited authors above are given their due.
+
+
+PURPOSE
+The purpose of this code is to expand upon F4EXB's code to integrate SDRAngel with USB relay controller boards.
+This will allow the user to control antenna switches, amplifiers, bandpass filters, etc. via SDRAngel.
+
+
+SUPPORTED DEVICES
+
+Currently supported relay boards:
+
+1. FTDI FT245R based devices, such as the Sainsmart 4 Channel USB Relay, as well as similar boards sold under the Quimat brandname.
+These use white PCBs marked with "1982-USB4CH" on them. Similar boards will probably also work, but as this was tested with a
+4-channel relay, only the first four relays will currently work.
+
+Amazon link: https://www.amazon.com/SainSmart-USB-Channel-Relay-Automation/dp/B07CSJ16W4
+
+
+2. CH340/341 based devices such as the SMAKN LCUS-1 USB relay (also sold under other names). These use blue PCBs with one relay.
+Similar devices may also work, but only one relay will currently work.
+
+Amazon link: https://www.amazon.com/SMAKN%C2%AE-LCUS-1-module-intelligent-control/dp/B01CN7E0RQ
+
+
+
+REQUIREMENTS
+To use this you will need:
+
+1.SDRAngel 4.5 or higher (Reverse API was added in 4.4.x but this was built and tested against 4.5).
+Link: https://github.com/f4exb/sdrangel
+
+2. Python 2.7. Note that this should work on both Linux and Windows but has only been tested on Linux (Ubuntu 18.04 LTS on x86-64).
+I highly recommend using pip to install modules.
+
+3.The "Flash" Python module (pip install Flask).
+
+4. The FTDI D2XX drivers. Note that the Kernel drivers in Ubuntu don't quite work (I believe they are for VCP).
+
+5. The ftd2xx Python module (pip install ftd2xx). 
+
+6. git (recommended)
+
+
+NOTE REGARDING LINUX KERNEL DRIVER
+1. You will probably want to blacklist the ftdi_sio kernel driver if you are using Linux. The can cause a DEVICE_NOT_FOUND error.
+
+
+CONFIGURATION
+To configure, you will need to edit conf.xml.
+
+The root tag in conf.xml is <relayngel>.
+
+Each relay board device will need its own node with a <relay> tag.
+
+The <device> child nodes under each <relay> associate relay actions with SDRAngel device actions.
+
+Example:
+
+<relayngel>
+        <relay index="0" type="FTDI_1982-USB4CH" serial_number="A907QK8N" port="" baud="">
+                <device index="0" on="?,?,?,1" off="?,?,?,0"/>
+                <device index="1" on="1,0,1,?" off="0,1,0,?"/>
+        </relay>
+
+        <relay index="1" type="CH341_LCUS-1" serial_number="" port="/dev/ttyUSB0" baud="9600">
+                <device index="0" on="1" off="0" />
+                <device index="1" on="0" off="?" />
+        </relay>
+</relayngel>
+
+Note that the first <relay> sets up a Quimat 4-channel relay board (same as Sainsmart).
+
+For the FTDI_1982-USB4CH type devices, serial_number is mandatory (look at dmesg). But port and baud should be left blank.
+
+The first <device> child node has an index of 0. The "on" attribute describes what relays should be closed when the SDRAngel device is activated (receiving or transmitting). Since the FTDI_1982-USB4CH device has four relays, there are four comma-separated values. 1 means closed/on, 0 means open/off, and ? means null. The "off" attribute has similar behavior.
+t
+Suppose you have a low-noise amplifier connected to relay 4. You would want it "on" when device #0 is receiving, and off when it is not. That is why the fourth value in the "on" attribute is "1" for the first <device> ("?,?,?,1").  We would want the amplifier off when we are not using device 0, so that is why the "off" attribute is set to "?,?,?,0". We don't want changes to device 0 to affect the other three relays, so they are set to null. Note that the second <device> will cause those other three relays to switch when device 1 is activated.
+
+For the CH341_LCUS-1, the situation is a bit simpler as there is only one relay. However, you could add more than two devices; for example if you had four different source devices configured in SDRAngel, you could have four <device> tags, each with different behaviors associated with it. 
+
+
+USE
+Linux: Once you have hardware connected and the conf.xml file prepared, you should start the Flask server by running relayngel.sh.
+
+
+
+
+
