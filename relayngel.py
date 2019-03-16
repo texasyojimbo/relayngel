@@ -59,12 +59,11 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
     for relay in root:
         relay_index     = relay.get("index")
         relay_type      = relay.get("type")
-        relay_serial    = relay.get("serial_number")
-        relay_port      = relay.get("port")
-        relay_baud      = relay.get("baud")
 
         if relay_type == "FTDI_1982-USB4CH":
         
+            relay_serial    = relay.get("serial_number")
+
             ON  = True
             OFF = False
             RELAY_ADDR = ( 0x01, 0x02, 0x04, 0x08 )
@@ -99,19 +98,28 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
                 if device_index == str(rcvd_dev_index):
                     if rcvd_dev_state == 0:
                         device_action = device.get("off")
+                        device_delay = device.get("delay_off")
                     if rcvd_dev_state == 1:
                         device_action = device.get("on")
+                        device_delay = device.get("delay_on")
                     device_action_tuple = device_action.split(",")
+                    device_delay_tuple = device_delay.split(",")
                     item_number=0
                     for item_state in device_action_tuple:
                         item_state_tag = "Null"
+                        device_delay = int(device_delay_tuple[item_number])
+                        device_delay = device_delay/1000.00
                         if item_state == "1":
+                            time.sleep(device_delay)
                             item_state_tag = ON
                         elif item_state == "0":
+                            time.sleep(device_delay)
                             item_state_tag = OFF
                         if item_state_tag != "Null":
                             setRelaySub(RELAY_ADDR[item_number], item_state_tag) 
                         item_number += 1
+                        if item_number > 4:
+                            confErrorExit ("More channels specified than are available on this device")
             
             state_string = str('{0:04b}'.format(ftdi_dev.getBitMode()))[::-1]
             print (" ! Updated State for Relay "+relay_type+" with s/n "+relay_serial+": "+state_string)           
@@ -119,7 +127,10 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
 
 
         if relay_type == "CH341_LCUS-1":
-            
+
+            relay_port=relay.get("port")
+            relay_baud=relay.get("baud")
+
             ser=serial.Serial()
             ser.port=relay_port
             ser.baud=relay_baud
@@ -127,17 +138,23 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
             
             for device in relay:
                 device_index = device.get("index")
+                device_delay = 0
                 if device_index == str(rcvd_dev_index):
                     if rcvd_dev_state == 1:
                         device_action = device.get("on")
+                        device_delay = int(device.get("delay_on"))
                     elif rcvd_dev_state == 0:
                         device_action = device.get("off")
+                        device_delay = int(device.get("delay_off"))
+                    device_delay = device_delay/1000.00
                     if device_action == "1":
-                        ser.write("A00101A2".decode('hex'))
-                        print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 1")
+                            time.sleep(device_delay)
+                            ser.write("A00101A2".decode('hex'))
+                            print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 1")
                     elif device_action == "0":
-                        ser.write("A00100A1".decode('hex'))
-                        print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 0")
+                            time.sleep(device_delay)
+                            ser.write("A00100A1".decode('hex'))
+                            print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 0")
             ser.close()
 
 

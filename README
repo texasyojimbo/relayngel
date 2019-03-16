@@ -81,25 +81,25 @@ The <device> child nodes under each <relay> associate relay actions with SDRAnge
 
 Example:
 
+<?xml version="1.0"?>
 <relayngel>
         <relay index="0" type="FTDI_1982-USB4CH" serial_number="A907QK8N" port="" baud="">
-                <device index="0" on="?,?,?,1" off="?,?,?,0"/>
-                <device index="1" on="1,0,1,?" off="0,1,0,?"/>
+                <device index="0" on="?,?,?,1" off="?,?,?,0" delay_on="0,0,0,0" delay_off="0,0,0,0"/>
+                <device index="1" on="1,0,1,?" off="0,1,0,?" delay_on="0,0,0,0" delay_off="0,0,50,0"/>
         </relay>
-
         <relay index="1" type="CH341_LCUS-1" serial_number="" port="/dev/ttyUSB0" baud="9600">
-                <device index="0" on="1" off="0" />
-                <device index="1" on="0" off="?" />
+                <device index="0" on="1" off="0" delay_on="0" delay_off="0" />
+                <device index="1" on="0" off="?" delay_on="0" delay_off="0" />
         </relay>
 </relayngel>
+             
+Note that the first <relay> sets up a Quimat 4-channel relay board (same as Sainsmart). For the FTDI_1982-USB4CH type devices, serial_number is mandatory (look at dmesg). But port and baud should be left blank or omitted.
 
-Note that the first <relay> sets up a Quimat 4-channel relay board (same as Sainsmart).
+The first <device> child node has an index of 0. The "on" attribute describes what relays should be closed when the SDRAngel device is activated (receiving or transmitting). Since the FTDI_1982-USB4CH device has four relay channels, there are four comma-separated values. 1 means closed/on, 0 means open/off, and ? means null. The "off" attribute has similar behavior.
 
-For the FTDI_1982-USB4CH type devices, serial_number is mandatory (look at dmesg). But port and baud should be left blank.
-
-The first <device> child node has an index of 0. The "on" attribute describes what relays should be closed when the SDRAngel device is activated (receiving or transmitting). Since the FTDI_1982-USB4CH device has four relays, there are four comma-separated values. 1 means closed/on, 0 means open/off, and ? means null. The "off" attribute has similar behavior.
-t
 Suppose you have a low-noise amplifier connected to relay 4. You would want it "on" when device #0 is receiving, and off when it is not. That is why the fourth value in the "on" attribute is "1" for the first <device> ("?,?,?,1").  We would want the amplifier off when we are not using device 0, so that is why the "off" attribute is set to "?,?,?,0". We don't want changes to device 0 to affect the other three relays, so they are set to null. Note that the second <device> will cause those other three relays to switch when device 1 is activated.
+
+The delay_on and delay_off attributes specify a delay (in milliseconds) before the channel is switched on or off.
 
 For the CH341_LCUS-1, the situation is a bit simpler as there is only one relay. However, you could add more than two devices; for example if you had four different source devices configured in SDRAngel, you could have four <device> tags, each with different behaviors associated with it. 
 
