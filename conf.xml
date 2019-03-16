@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<relayngel>
+	<relay index="0" type="FTDI_1982-USB4CH" serial="A907QK8N">
+		<device index="0" on="?,?,?,1" off='?,?,?,0'/>
+		<device index="1" on="1,0,1,?" off='0,1,0,?'/>
+	</relay>	
+</relayngel>

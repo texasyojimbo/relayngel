@@ -1,0 +1,13 @@
+(1) Install FTDI drivers for Linux (file names will change):
+	
+	* Download tar.gz file from https://www.ftdichip.com/Drivers/D2XX.htm
+	* Untar file 
+		tar -xvf ~/libftd2xx-x86_64-1.4.8.gz
+	* Copy files to /usr/local/lib and create symbolic link per the FTDI instructions.
+		sudo cp /release/build/lib/libftd* /usr/local/lib && ln -sf /usr/local/lib/libftd2xx.so.1.4.8 /usr/local/lib/libftd2xx.so
+	* Run sudo ldconfig 
+
+(2) pip install ftd2xx
+
+(3) rmmod ftdi_sio (if you get DEVICE_NOT_OPENED errors).
+
