@@ -40,12 +40,12 @@ These use white PCBs marked with "1982-USB4CH" on them. Similar boards will prob
 
 Amazon link: https://www.amazon.com/SainSmart-USB-Channel-Relay-Automation/dp/B07CSJ16W4
 
-
 2. CH340/341 based devices such as the SMAKN LCUS-1 USB relay (also sold under other names). These use blue PCBs with one relay.
 Similar devices may also work, but only one relay will currently work.
 
 Amazon link: https://www.amazon.com/SMAKN%C2%AE-LCUS-1-module-intelligent-control/dp/B01CN7E0RQ
 
+3. As an alternative to using hardware, or to support other hardware using external processes, I have added a PROCESS "relay" that can call an executable. For example, if you wanted to call a shell script or batch file everytime you start or stop transmission.
 
 
 REQUIREMENTS
@@ -91,6 +91,9 @@ Example:
                 <device index="0" on="1" off="0" delay_on="0" delay_off="0" />
                 <device index="1" on="0" off="?" delay_on="0" delay_off="0" />
         </relay>
+        <relay index="2" type="PROCESS">
+                <device index="0" on="touch foo" off="touch bar" delay_on="0" delay_off="0"/>
+        </relay>
 </relayngel>
              
 Note that the first <relay> sets up a Quimat 4-channel relay board (same as Sainsmart). For the FTDI_1982-USB4CH type devices, serial_number is mandatory (look at dmesg). But port and baud should be left blank or omitted.
@@ -102,6 +105,9 @@ Suppose you have a low-noise amplifier connected to relay 4. You would want it "
 The delay_on and delay_off attributes specify a delay (in milliseconds) before the channel is switched on or off.
 
 For the CH341_LCUS-1, the situation is a bit simpler as there is only one relay. However, you could add more than two devices; for example if you had four different source devices configured in SDRAngel, you could have four <device> tags, each with different behaviors associated with it. 
+
+For PROCESS, stdout and stderr are sent to /dev/null. If you require logging of process output, then you should include that in your shell/batch script.
+
 
 
 USE
