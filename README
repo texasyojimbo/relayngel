@@ -2,7 +2,7 @@
 #
 # relayngel
 #
-# v 1.1
+# v 1.2
 #
 ###############################################
 #
@@ -56,16 +56,21 @@ To use this you will need:
 1.SDRAngel 4.5 or higher (Reverse API was added in 4.4.x but this was built and tested against 4.5).
 Link: https://github.com/f4exb/sdrangel
 
-2. Python 2.7. Note that this should work on both Linux and Windows but has only been tested on Linux (Ubuntu 18.04 LTS on x86-64).
+2. Python 2.7. Note that this should work on both Linux and Windows.
+I have tested on Ubuntu 18.04 LTS on x86-64 as well as Windows 7 on x86-64
 I highly recommend using pip to install modules.
 
-3.The "Flash" Python module (pip install Flask).
+3.The "Flask" Python module (pip install Flask).
 
 4. The FTDI D2XX drivers. Note that the Kernel drivers in Ubuntu don't quite work (I believe they are for VCP).
 
-5. The ftd2xx Python module (pip install ftd2xx). 
+5. On Windows -- you will need to get CH340 driver.
 
-6. git (recommended)
+6. The ftd2xx Python module (pip install ftd2xx). 
+
+7. On Windows -- the pywin32 Python module (C:\Python27\python -m pip install pywin32), the serial module (C:\Python27\python -m pip install serial)  and the pyserial module (C:\Python27\python -m pip install pyserial).
+
+8. git (recommended)
 
 
 NOTE REGARDING LINUX KERNEL DRIVER
@@ -73,9 +78,9 @@ NOTE REGARDING LINUX KERNEL DRIVER
 
 
 CONFIGURATION
-To configure, you will need to edit conf.xml.
+To configure, you will need to edit config.xml.
 
-The root tag in conf.xml is <relayngel>.
+The root tag in config.xml is <relayngel>.
 
 Each relay board device will need its own node with a <relay> tag.
 
@@ -111,11 +116,10 @@ For the CH341_LCUS-1, the situation is a bit simpler as there is only one relay.
 For PROCESS, stdout and stderr are sent to /dev/null. If you require logging of process output, then you should include that in your shell/batch script.
 
 
-
 USE
-Linux: Once you have hardware connected and the conf.xml file prepared, you should start the Flask server by running relayngel.sh.
 
+Linux: Once you have hardware connected and the config.xml file prepared, you should start the Flask server by running relayngel.sh.
 
-
+Windows: Once you have hardware connected and the config.xml file prepared, you should start the Flask server by running relayngel.bat.
 
 
