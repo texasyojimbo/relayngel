@@ -2,19 +2,23 @@ from flask import Flask
 from flask import request, jsonify
 app = Flask(__name__)
 
+import os
 import sys
 import time
 import serial
+import subprocess
+
 import ftd2xx as ft
 import xml.etree.ElementTree as ET
 
+
 ### Parse configuration file and setup hardware
 
-tree = ET.parse('conf.xml')
+tree = ET.parse('config.xml')
 root = tree.getroot()
 
 def confErrorExit(message):
-    print (" ! Configuration conf.xml is invalid: "+message)
+    print (" ! Configuration config.xml is invalid: "+message)
     sys.exit(1)
 
 if root.tag != "relayngel":
@@ -39,8 +43,12 @@ for relay in root:
                 item_state_tag = "OFF"
             else:
                 item_state_tag = "NULL"
+        if relay_type == "PROCESS":
+            item_state_tag = device_action
+            print (" ~\t SDRAngel Device "+str(device_index)+"\tProcess "+str(item_number)+"\tProcess Called (when Device Active): "+item_state_tag)
+        else:
             print (" ~\t SDRAngel Device "+str(device_index)+"\tRelay "+str(item_number)+"\tRelay State (When Device Active): "+item_state_tag)
-            item_number += 1
+        item_number += 1
 
     if device_index == -1:
         confErrorExit("No device actions configured where relay_index="+str(relay_index))
@@ -59,6 +67,8 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
     for relay in root:
         relay_index     = relay.get("index")
         relay_type      = relay.get("type")
+
+# FTDI type devices for example Sainsmart and Quimat 4 channel USB relays
 
         if relay_type == "FTDI_1982-USB4CH":
         
@@ -126,6 +136,9 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
             ftdi_dev.close()                    
 
 
+# CH341 type devices particularly the LC Technology LCUS Type 1
+
+
         if relay_type == "CH341_LCUS-1":
 
             relay_port=relay.get("port")
@@ -157,7 +170,32 @@ def setRelay(rcvd_dev_index,rcvd_dev_state):
                             print (" ! Updated State for Relay "+relay_type+" on "+relay_port+": 0")
             ser.close()
 
+# Call a program instead of a device. This will allow facilitation of relays without good Python support
+# as well as permit other actions (logging transmissions to file, etc).
 
+        if relay_type == "PROCESS":
+        
+            for device in relay:
+                device_index = device.get("index")
+                device_delay = 0
+                if device_index == str(rcvd_dev_index):
+                    if rcvd_dev_state == 1:
+                        device_action = device.get("on")
+                        device_delay = int(device.get("delay_on"))
+                    elif rcvd_dev_state == 0:
+                        device_action = device.get("off")
+                        device_delay = int(device.get("delay_off"))
+                    device_delay = device_delay/1000.00
+                    time.sleep(device_delay)
+                    process_name = device_action.split(" ")
+                    with open(os.devnull, "w") as devnull:
+                        process_return_value = subprocess.call(process_name, stdout=devnull, stderr=devnull)
+                    print (" ~ Process "+device_action+" was called and returned "+str(process_return_value))
+
+
+
+# Below this point is heavily rooted in reversapi.py
+# by Edouard F4EXB. 
 
 @app.route('/sdrangel')
 def hello_sdrangel():
