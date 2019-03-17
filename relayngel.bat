@@ -1,13 +1,11 @@
-#!/bin/bash
-
 ############################################
 #
-# relayngel.sh
+# relayngel.bat
 #
 ############################################
 # 
 # author: AD5NL (jim.dallas@gmail.com)
-# date: 16 Mar 2019
+# date: 17 Mar 2019
 #
 ############################################
 #
@@ -21,12 +19,10 @@
 #
 # flask run --host=0.0.0.0 --port=8888
 #
-# You can also change FLASK_ENV to
-# development for debugging purposes
-#
 ############################################
 
-export FLASK_APP=relayngel.py
-export FLASK_ENV=production
+set PYTHON_PATH=C:\Python27
+set FLASK_APP=relayngel.py
+set FLASK_ENV=production
 
-flask run --port=8888 
+%PYTHON_PATH%\python -m flask run --port=8888 
