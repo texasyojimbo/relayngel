@@ -68,7 +68,7 @@ I highly recommend using pip to install modules.
 
 6. The ftd2xx Python module (pip install ftd2xx). 
 
-7. On Windows -- the pywin32 Python module (C:\Python27\python -m pip install pywin32), the serial module (C:\Python27\python -m pip install serial)  and the pyserial module (C:\Python27\python -m pip install pyserial).
+7. On Windows -- the pywin32 Python module (C:\Python27\python -m pip install pywin32), and the pyserial module (C:\Python27\python -m pip install pyserial).
 
 8. git (recommended)
 
